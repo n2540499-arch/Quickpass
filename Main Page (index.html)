@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Navigator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            width: 350px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #2b3a55;
+            margin-bottom: 15px;
+        }
+
+        .traffic-status {
+            background: #ffdddd;
+            padding: 12px;
+            border: 1px solid #ff9090;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #c0392b;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            background: #2b8eff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b6fd8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Smart Traffic Navigator</h2>
+
+        <!-- This will later be updated automatically by ESP32 -->
+        <div class="traffic-status">
+            ⚠️ Main Road Status: **Heavy Traffic Detected**
+        </div>
+
+        <label><b>Select Vehicle Type</b></label>
+        <select id="vehicleType">
+            <option value="">-- Choose --</option>
+            <option value="emergency">Emergency Vehicle</option>
+            <option value="normal">Normal Vehicle</option>
+        </select>
+
+        <label><b>Enter Vehicle Code</b></label>
+        <input type="text" id="vehicleCode" placeholder="e.g. EMS-101 / C-556">
+
+        <button onclick="submitData()">Confirm</button>
+    </div>
+
+<script>
+function submitData() {
+    let type = document.getElementById("vehicleType").value;
+    let code = document.getElementById("vehicleCode").value;
+
+    if (type === "" || code === "") {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    alert("Vehicle confirmed!\nType: " + type + "\nCode: " + code);
+
+    // Redirect to next page (later you’ll create it)
+    // You can change "route.html" to any page you want
+    window.location.href = "route.html";
+}
+</script>
+
+</body>
+</html>
+

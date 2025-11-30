@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Route</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            width: 360px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #283a5e;
+        }
+
+        .box {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .emergency {
+            background: #ff4d4d;
+            color: white;
+        }
+
+        .normal {
+            background: #f7c948;
+            color: black;
+        }
+
+        .box:hover {
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            color: #1b6fd8;
+            cursor: pointer;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Select Your Road</h2>
+
+    <p style="color:#444;">Choose the recommended route for your vehicle type.</p>
+
+    <div class="box emergency" onclick="selectRoute('emergency')">
+        Emergency Route → Right Side
+    </div>
+
+    <div class="box normal" onclick="selectRoute('normal')">
+        Normal Route → Left Side
+    </div>
+
+    <p class="back-btn" onclick="goBack()">← Back</p>
+</div>
+
+<script>
+function selectRoute(type) {
+    alert("Route selected: " + type + "\nLED on this road will turn ON.");
+    // Later this will communicate with ESP32
+}
+
+function goBack() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

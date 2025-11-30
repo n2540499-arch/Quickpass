@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Guidance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6ff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background: #324ea8;
+            color: white;
+            padding: 25px 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        .traffic-status {
+            background: #ffcccc;
+            padding: 20px;
+            width: 60%;
+            margin: auto;
+            border-radius: 10px;
+            font-size: 22px;
+            border-left: 8px solid red;
+        }
+
+        .btn {
+            display: block;
+            width: 250px;
+            margin: 25px auto;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .emergency {
+            background: #d70000;
+            color: white;
+        }
+
+        .emergency:hover {
+            background: #b30000;
+        }
+
+        .normal {
+            background: #ffce00;
+        }
+
+        .normal:hover {
+            background: #e0b500;
+        }
+    </style>
+</head>
+<body>
+
+<header>Smart Traffic System</header>
+
+<div class="container">
+
+    <div class="traffic-status">
+        🚗 Traffic Alert:  
+        <br><br>
+        <b>Main Road Status: BUSY (detected by sensors)</b>
+    </div>
+
+    <h2>Select Your Vehicle Type</h2>
+
+    <!-- Emergency Page -->
+    <button class="btn emergency" onclick="location.href='emergency.html'">
+        Emergency Vehicle
+    </button>
+
+    <!-- Normal Page -->
+    <button class="btn normal" onclick="location.href='normal.html'">
+        Normal Vehicle
+    </button>
+
+</div>
+
+</body>
+</html>

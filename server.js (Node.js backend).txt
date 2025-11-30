@@ -1,0 +1,123 @@
+// server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+const PORT = process.env.PORT || 4000;
+const roads = {
+  "road-1": {
+    sensors: [],
+    congestion: false,
+    pollution: "N/A",
+    lastUpdate: null,
+    ledCommand: "none", // "none" | "right" | "left"
+    pendingRequests: []  // {id, vehicleCode, type, status}
+  }
+};
+
+// helper: determine congestion simple rule
+function isCongested(recent){
+  const threshold = 50; // cm
+  let count = 0;
+  recent.forEach(r=>{
+    if(r.distance1 !== undefined && r.distance1 < threshold) count++;
+    if(r.distance2 !== undefined && r.distance2 < threshold) count++;
+  });
+  return count >= 3;
+}
+
+function formatPollution(mq_pct){
+  if(mq_pct === undefined || mq_pct === null) return "N/A";
+  const n = Number(mq_pct);
+  if(isNaN(n)) return "N/A";
+  return n.toFixed(1) + "%";
+}
+
+// sensors post data here
+app.post('/api/sensor/:roadId', (req,res)=>{
+  const roadId = req.params.roadId || "road-1";
+  const body = req.body;
+  if(!roads[roadId]) roads[roadId] = { sensors:[], congestion:false, pollution:"N/A", lastUpdate:null, ledCommand:"none", pendingRequests:[]};
+  const entry = {
+    sensorId: body.sensorId || 'esp32',
+    distance1: body.distance1,
+    distance2: body.distance2,
+    mq_raw: body.mq_raw,
+    mq_pct: body.mq_pct,
+    timestamp: Date.now()
+  };
+  roads[roadId].sensors.push(entry);
+  if(roads[roadId].sensors.length>300) roads[roadId].sensors.shift();
+
+  const recent = roads[roadId].sensors.slice(-20);
+  const congested = isCongested(recent);
+  const pollution = formatPollution(entry.mq_pct);
+
+  roads[roadId].congestion = congested;
+  roads[roadId].pollution = pollution;
+  roads[roadId].lastUpdate = Date.now();
+
+  res.json({ status: 'ok', roadId, congestion: congested, pollution });
+});
+
+// frontend status fetch
+app.get('/api/road-status/:roadId?', (req,res)=>{
+  const roadId = req.params.roadId || "road-1";
+  const r = roads[roadId] || {};
+  res.json({
+    roadId,
+    congestion: r.congestion || false,
+    pollution: r.pollution || "N/A",
+    lastUpdate: r.lastUpdate || null,
+    weather: "N/A", // placeholder, can integrate OpenWeather
+    recommendedFor: { emergency:"right", normal:"left" },
+    pending: r.pendingRequests || []
+  });
+});
+
+// drivers request pass: { vehicleCode, type }
+app.post('/api/request-pass/:roadId', (req,res)=>{
+  const roadId = req.params.roadId || "road-1";
+  const { vehicleCode, type } = req.body;
+  if(!vehicleCode || !type) return res.status(400).json({ error:"vehicleCode and type required" });
+  if(!roads[roadId]) return res.status(404).json({ error:"road not found" });
+
+  const reqObj = { id: Date.now().toString(), vehicleCode, type, status: "pending", timestamp: Date.now() };
+  roads[roadId].pendingRequests.push(reqObj);
+
+  // DEMO validation: accept if code length >= 3
+  if(vehicleCode.length >= 3){
+    reqObj.status = "approved";
+    roads[roadId].ledCommand = (type === 'emergency') ? 'right' : 'left';
+    // clear led after 15s (simulate passing)
+    setTimeout(()=>{
+      if(roads[roadId].ledCommand === (type === 'emergency' ? 'right' : 'left')) roads[roadId].ledCommand = 'none';
+    }, 15000);
+    return res.json({ status: "approved", led: roads[roadId].ledCommand });
+  } else {
+    reqObj.status = "rejected";
+    return res.json({ status: "rejected", reason: "invalid vehicle code" });
+  }
+});
+
+// ESP polls this endpoint to get LED command
+app.get('/api/led-command/:roadId', (req,res)=>{
+  const roadId = req.params.roadId || "road-1";
+  const info = roads[roadId] || { ledCommand: "none" };
+  res.json({ led: info.ledCommand });
+});
+
+// optional admin endpoint to set LED directly
+app.post('/api/set-led/:roadId', (req,res)=>{
+  const roadId = req.params.roadId || "road-1";
+  const { led } = req.body;
+  if(!roads[roadId]) roads[roadId] = { ledCommand: 'none', pendingRequests: [] };
+  roads[roadId].ledCommand = led || 'none';
+  res.json({ status: 'ok', led: roads[roadId].ledCommand });
+});
+
+app.listen(PORT, ()=>console.log(`Backend listening on ${PORT}`));

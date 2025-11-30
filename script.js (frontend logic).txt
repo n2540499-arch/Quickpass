@@ -1,0 +1,85 @@
+// CONFIG: change this to your backend public URL or http://localhost:4000 for local.
+const BACKEND = "http://localhost:4000";
+const ROAD_ID = "road-1";
+
+// --- simple persistent allowed codes (stored in localStorage) ---
+let allowedCodes = JSON.parse(localStorage.getItem("allowedCodes")) || {
+  "EMG-101": "emergency",
+  "EMG-202": "emergency",
+  "NRM-111": "normal",
+  "NRM-222": "normal"
+};
+function saveCodes(){ localStorage.setItem("allowedCodes", JSON.stringify(allowedCodes)); }
+function renderCodes(){
+  const el = document.getElementById("codesList");
+  el.innerText = Object.entries(allowedCodes).map(([c,t])=>`${c}  — ${t}`).join("\n");
+}
+renderCodes();
+
+// --- DOM bindings ---
+document.getElementById("refreshBtn").addEventListener("click", fetchStatus);
+document.getElementById("requestBtn").addEventListener("click", requestPass);
+document.getElementById("addCodeBtn").addEventListener("click", addCode);
+
+// fetch current road status
+async function fetchStatus(){
+  try{
+    const res = await fetch(`${BACKEND}/api/road-status/${ROAD_ID}`);
+    if(!res.ok) throw new Error("Status fetch failed");
+    const j = await res.json();
+    document.getElementById("roadId").innerText = j.roadId || ROAD_ID;
+    document.getElementById("congestion").innerText = j.congestion ? "Yes" : "No";
+    document.getElementById("pollution").innerText = j.pollution || "N/A";
+    document.getElementById("lastUpdate").innerText = j.lastUpdate ? new Date(j.lastUpdate).toLocaleString() : "-";
+    document.getElementById("weather").innerText = j.weather || "N/A";
+  }catch(err){
+    console.warn(err);
+    document.getElementById("congestion").innerText = "Offline";
+  }
+}
+
+// request pass (driver)
+async function requestPass(){
+  const code = document.getElementById("vehicleCode").value.trim();
+  const type = document.getElementById("vehicleType").value;
+  const resEl = document.getElementById("requestResult");
+  if(!code){ resEl.innerText="Enter vehicle code"; resEl.style.color="red"; return; }
+
+  try{
+    const res = await fetch(`${BACKEND}/api/request-pass/${ROAD_ID}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ vehicleCode: code, type })
+    });
+    const j = await res.json();
+    if(j.status === "approved"){
+      resEl.style.color = "green";
+      resEl.innerText = `Approved — LED: ${j.led}`;
+    } else {
+      resEl.style.color = "red";
+      resEl.innerText = `Rejected: ${j.reason || JSON.stringify(j)}`;
+    }
+  }catch(e){
+    resEl.style.color = "red";
+    resEl.innerText = "Request failed (backend unreachable)";
+  }
+}
+
+// admin adds codes locally
+function addCode(){
+  const code = document.getElementById("newCode").value.trim();
+  const type = document.getElementById("newType").value;
+  const status = document.getElementById("adminStatus");
+  if(!code){ status.innerText="Enter code"; status.style.color="red"; return; }
+  allowedCodes[code] = type;
+  saveCodes();
+  renderCodes();
+  status.innerText = `Added ${code} (${type})`;
+  status.style.color = "green";
+  setTimeout(()=>status.innerText="",2000);
+  document.getElementById("newCode").value = "";
+}
+
+// auto-refresh
+fetchStatus();
+setInterval(fetchStatus, 3000);
