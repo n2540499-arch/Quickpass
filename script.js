@@ -49,6 +49,25 @@
 // }
 
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBj8DWZlVpfzxt5lyekuG6CPT5a15VPwzM",
+  authDomain: "nada-8cd8f.firebaseapp.com",
+  databaseURL: "https://nada-8cd8f-default-rtdb.firebaseio.com",
+  projectId: "nada-8cd8f",
+  storageBucket: "nada-8cd8f.firebasestorage.app",
+  messagingSenderId: "317428055796",
+  appId: "1:317428055796:web:296d243c885b8152eda8a1",
+  measurementId: "G-4D6Y5F7X95"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+</script>
 
 <script>
 // ---- Vehicle Allowed Codes ----
@@ -104,3 +123,4 @@ function refreshData() {
 // Auto load sensor data
 refreshData();
 </script>
+
