@@ -1,7 +1,0 @@
-SmartTrafficProject/
-│
-├── index.html
-├── route.html
-├── dashboard.html
-├── data.json
-└── README.md
